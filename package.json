@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "MSME Staff Recognition 2026 — NestJS API",
   "scripts": {
+    "postinstall": "prisma generate",
     "build": "nest build",
     "start": "node dist/main",
     "start:dev": "nest start --watch",

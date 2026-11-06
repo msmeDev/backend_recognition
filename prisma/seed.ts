@@ -12,19 +12,21 @@ async function main() {
   // ── Male staff ────────────────────────────────────────────────────────────
   await prisma.staffMale.createMany({
     data: [
-      { fullName: 'James Okonkwo' },
-      { fullName: 'David Adeyemi' },
-      { fullName: 'Emmanuel Chukwu' },
-      { fullName: 'Samuel Nwosu' },
-      { fullName: 'Michael Eze' },
-      { fullName: 'Victor Okafor' },
+      { fullName: 'Tosin Ogunsan' },
+      { fullName: 'Kolapo Taofeeq' },
+      { fullName: 'Ridwan AbdulKadir' },
+      { fullName: 'Mustapha Sulaiman' },
+      { fullName: 'Kamoru Sodiq' },
+      { fullName: 'Samson Kolawole' },
+      { fullName: 'Ayoola Olalekan' },
+      { fullName: 'Bolawaji Ayobami' },
     ],
   });
 
   // ── Female staff ──────────────────────────────────────────────────────────
   await prisma.staffFemale.createMany({
     data: [
-      { fullName: 'Grace Abiodun' },
+      { fullName: 'Desire Adeyemo' },
       { fullName: 'Blessing Okoye' },
       { fullName: 'Faith Nwachukwu' },
       { fullName: 'Chiamaka Nnaji' },
@@ -38,13 +40,15 @@ async function main() {
   // in the cross-table duplicate check work correctly.
   await prisma.staffAll.createMany({
     data: [
-      { fullName: 'James Okonkwo' },
-      { fullName: 'David Adeyemi' },
-      { fullName: 'Emmanuel Chukwu' },
-      { fullName: 'Samuel Nwosu' },
-      { fullName: 'Michael Eze' },
-      { fullName: 'Victor Okafor' },
-      { fullName: 'Grace Abiodun' },
+      { fullName: 'Tosin Ogunsan' },
+      { fullName: 'Kolapo Taofeeq' },
+      { fullName: 'Ridwan AbdulKadir' },
+      { fullName: 'Mustapha Sulaiman' },
+      { fullName: 'Kamoru Sodiq' },
+      { fullName: 'Samson Kolawole' },
+      { fullName: 'Ayoola Olalekan' },
+      { fullName: 'Bolawaji Ayobami' },
+      { fullName: 'Desire Adeyemo' },
       { fullName: 'Blessing Okoye' },
       { fullName: 'Faith Nwachukwu' },
       { fullName: 'Chiamaka Nnaji' },
