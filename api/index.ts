@@ -1,4 +1,5 @@
-// Vercel serverless entry point.
-// buildCommand in vercel.json runs `nest build` first, producing dist/.
-// This file re-exports the handler that main.ts exports for Vercel.
-export { default } from '../dist/main';
+// TypeScript import would fail at build time because dist/ does not exist yet
+// when nest build runs. require() is resolved at runtime (after dist/ exists),
+// so tsc accepts it without resolving the path.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+export default require('../dist/main').default;
