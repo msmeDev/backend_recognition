@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class VerifyService {
@@ -13,24 +12,33 @@ export class VerifyService {
       return { found: false };
     }
 
-    // $queryRaw gives us LOWER(TRIM()) on both sides — identical to the
-    // original SQL behaviour and unambiguous about whitespace handling.
-    const rows = await this.prisma.$queryRaw<{ id: number; full_name: string }[]>(
-      Prisma.sql`
-        SELECT id, full_name
-        FROM   staff_all
-        WHERE  LOWER(TRIM(full_name)) = LOWER(TRIM(${name.trim()}))
-        LIMIT  1
-      `,
-    );
+    const inputWords = name.toLowerCase().trim().split(/\s+/).sort();
 
-    if (rows.length === 0) {
+    // Fetch candidates containing at least one input word (case-insensitive).
+    const candidates = await this.prisma.staffAll.findMany({
+      where: {
+        OR: inputWords.map((word) => ({
+          fullName: { contains: word, mode: 'insensitive' as const },
+        })),
+      },
+      select: { id: true, fullName: true },
+    });
+
+    const match = candidates.find((c) => {
+      const dbWords = c.fullName.toLowerCase().trim().split(/\s+/).sort();
+      return (
+        dbWords.length === inputWords.length &&
+        inputWords.every((w, i) => w === dbWords[i])
+      );
+    });
+
+    if (!match) {
       return { found: false };
     }
 
     return {
       found: true,
-      staff: { id: rows[0].id, full_name: rows[0].full_name },
+      staff: { id: match.id, full_name: match.fullName },
     };
   }
 }
