@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Staff tables
+// ---------------------------------------------------------------------------
+
+model StaffMale {
+  id        Int      @id @default(autoincrement())
+  fullName  String   @map("full_name")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Two FK columns in Nomination reference this table, so each relation needs
+  // a unique name to avoid Prisma's "ambiguous relation" error.
+  bestStaffMaleNominations   Nomination[] @relation("BestStaffMale")
+  bestDressedMaleNominations Nomination[] @relation("BestDressedMale")
+
+  @@map("staff_male")
+}
+
+model StaffFemale {
+  id        Int      @id @default(autoincrement())
+  fullName  String   @map("full_name")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  bestStaffFemaleNominations   Nomination[] @relation("BestStaffFemale")
+  bestDressedFemaleNominations Nomination[] @relation("BestDressedFemale")
+
+  @@map("staff_female")
+}
+
+// staff_all holds every employee (male + female).
+// The verify endpoint looks up nominator_id from this table.
+model StaffAll {
+  id        Int      @id @default(autoincrement())
+  fullName  String   @map("full_name")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Four FK columns in Nomination reference this table.
+  nominatorNominations           Nomination[] @relation("Nominator")
+  mostSocialStaffNominations     Nomination[] @relation("MostSocialStaff")
+  bestTeamPlayerNominations      Nomination[] @relation("BestTeamPlayer")
+  mostSupportiveStaffNominations Nomination[] @relation("MostSupportiveStaff")
+
+  @@map("staff_all")
+}
+
+// ---------------------------------------------------------------------------
+// Nominations table
+// UNIQUE on nominatorId prevents one person from submitting twice.
+// No uniqueness on nominee columns — multiple nominators can vote for the same person.
+// ---------------------------------------------------------------------------
+
+model Nomination {
+  id                    Int      @id @default(autoincrement())
+  nominatorId           Int      @unique @map("nominator_id")
+  bestStaffMaleId       Int?     @map("best_staff_male_id")
+  bestStaffFemaleId     Int?     @map("best_staff_female_id")
+  bestDressedMaleId     Int?     @map("best_dressed_male_id")
+  bestDressedFemaleId   Int?     @map("best_dressed_female_id")
+  mostSocialStaffId     Int?     @map("most_social_staff_id")
+  bestTeamPlayerId      Int?     @map("best_team_player_id")
+  mostSupportiveStaffId Int?     @map("most_supportive_staff_id")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  nominator           StaffAll    @relation("Nominator",          fields: [nominatorId],           references: [id])
+  bestStaffMale       StaffMale?  @relation("BestStaffMale",      fields: [bestStaffMaleId],       references: [id])
+  bestStaffFemale     StaffFemale? @relation("BestStaffFemale",   fields: [bestStaffFemaleId],     references: [id])
+  bestDressedMale     StaffMale?  @relation("BestDressedMale",    fields: [bestDressedMaleId],     references: [id])
+  bestDressedFemale   StaffFemale? @relation("BestDressedFemale", fields: [bestDressedFemaleId],   references: [id])
+  mostSocialStaff     StaffAll?   @relation("MostSocialStaff",    fields: [mostSocialStaffId],     references: [id])
+  bestTeamPlayer      StaffAll?   @relation("BestTeamPlayer",     fields: [bestTeamPlayerId],      references: [id])
+  mostSupportiveStaff StaffAll?   @relation("MostSupportiveStaff", fields: [mostSupportiveStaffId], references: [id])
+
+  @@map("nominations")
+}
