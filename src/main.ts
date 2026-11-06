@@ -3,10 +3,22 @@ import { NestFactory } from '@nestjs/core';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from './app.module';
 
+function getAllowedOrigins(): (string | RegExp)[] {
+  const origins: (string | RegExp)[] = [
+    'http://localhost:3001',
+    'http://localhost:3000',
+    /^https:\/\/.*\.vercel\.app$/,
+  ];
+  if (process.env.FRONTEND_URL) {
+    origins.push(process.env.FRONTEND_URL);
+  }
+  return origins;
+}
+
 async function createApp(): Promise<INestApplication> {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+    origin: getAllowedOrigins(),
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
