@@ -1,16 +1,10 @@
 {
   "version": 2,
   "buildCommand": "npm install && npx prisma generate && npm run build",
-  "builds": [
+  "rewrites": [
     {
-      "src": "dist/main.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "dist/main.js"
+      "source": "/(.*)",
+      "destination": "/api/index"
     }
   ]
 }
