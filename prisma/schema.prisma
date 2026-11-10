@@ -3,9 +3,14 @@ generator client {
   binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
+// DATABASE_URL — pooled host (pooled.db.prisma.io): used by the app at runtime.
+//   Pool size/timeouts are added in src/prisma/prisma.service.ts.
+// DIRECT_URL   — direct host (db.prisma.io): used only by the Prisma CLI
+//   (db push, migrate, db pull), which needs a session the pooler can't give.
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ---------------------------------------------------------------------------

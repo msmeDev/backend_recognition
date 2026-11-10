@@ -10,7 +10,8 @@ function getAllowedOrigins(): (string | RegExp)[] {
     /^https:\/\/.*\.vercel\.app$/,
   ];
   if (process.env.FRONTEND_URL) {
-    origins.push(process.env.FRONTEND_URL);
+    // Browsers send Origin without a trailing slash; strip one so it matches.
+    origins.push(process.env.FRONTEND_URL.replace(/\/+$/, ''));
   }
   return origins;
 }
@@ -39,13 +40,26 @@ if (!process.env.VERCEL) {
 
 // ── Vercel serverless handler ────────────────────────────────────────────────
 // Cached across warm invocations to avoid re-bootstrapping on every request.
-let cachedHttpHandler: ((req: any, res: any) => void) | null = null;
+// The *promise* is cached, so requests that arrive together during a cold start
+// share one bootstrap (and one PrismaClient) instead of each building an app.
+type HttpHandler = (req: any, res: any) => void;
+let httpHandlerPromise: Promise<HttpHandler> | null = null;
+
+function getHttpHandler(): Promise<HttpHandler> {
+  if (!httpHandlerPromise) {
+    httpHandlerPromise = (async () => {
+      const app = await createApp();
+      await app.init();
+      return app.getHttpAdapter().getInstance() as HttpHandler;
+    })().catch((err) => {
+      httpHandlerPromise = null; // don't cache a failed bootstrap; retry on the next request
+      throw err;
+    });
+  }
+  return httpHandlerPromise;
+}
 
 export default async function handler(req: any, res: any) {
-  if (!cachedHttpHandler) {
-    const app = await createApp();
-    await app.init();
-    cachedHttpHandler = app.getHttpAdapter().getInstance();
-  }
-  cachedHttpHandler(req, res);
+  const httpHandler = await getHttpHandler();
+  httpHandler(req, res);
 }
