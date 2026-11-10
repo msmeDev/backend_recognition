@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 const ALL_STAFF: { id: number; fullName: string }[] = [
   { id: 1, fullName: 'Bibiana Adaramola' },
   { id: 2, fullName: 'Boluwaji Esther Ojo' },
-  { id: 3, fullName: 'Christianah SIMEON' },
+  { id: 3, fullName: 'Christianah Simeone' },
   { id: 4, fullName: 'David Adebayo' },
   { id: 5, fullName: 'Dinma Osiagwu' },
   { id: 6, fullName: 'Efe Okogbare' },
@@ -82,7 +82,7 @@ const MALE_NAMES = [
 const FEMALE_NAMES = [
   'Bibiana Adaramola',
   'Boluwaji Esther Ojo',
-  'Christianah SIMEON',
+  'Christianah Simeone',
   'Dinma Osiagwu',
   'Iyiola Olajide',
   'Oluwakemi Animasahun',
