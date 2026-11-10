@@ -36,20 +36,35 @@ model StaffFemale {
   @@map("staff_female")
 }
 
-// staff_all holds every employee (male + female).
-// The verify endpoint looks up nominator_id from this table.
+// staff_all holds every nominee candidate (male + female) for the
+// gender-neutral categories. Nominators are looked up in staff_all_view.
 model StaffAll {
   id        Int      @id @default(autoincrement())
   fullName  String   @map("full_name")
   createdAt DateTime @default(now()) @map("created_at")
 
-  // Four FK columns in Nomination reference this table.
-  nominatorNominations           Nomination[] @relation("Nominator")
+  // Three FK columns in Nomination reference this table.
   mostSocialStaffNominations     Nomination[] @relation("MostSocialStaff")
   bestTeamPlayerNominations      Nomination[] @relation("BestTeamPlayer")
   mostSupportiveStaffNominations Nomination[] @relation("MostSupportiveStaff")
 
   @@map("staff_all")
+}
+
+// staff_all_view holds every staff member who may verify (all 38), including
+// the few who are not nominee candidates in staff_all. Read-only from the app;
+// populated by prisma/seed.ts. Used by POST /api/verify and GET /api/verify/search.
+// Ids match staff_all for everyone who is in both.
+// nominations.nominator_id references this table, so all 38 staff can submit.
+model StaffAllView {
+  id        Int      @id @default(autoincrement())
+  fullName  String   @map("full_name")
+  createdAt DateTime @map("created_at")
+
+  // nominator_id is UNIQUE, so each staff member has at most one nomination.
+  nomination Nomination? @relation("Nominator")
+
+  @@map("staff_all_view")
 }
 
 // ---------------------------------------------------------------------------
@@ -70,7 +85,7 @@ model Nomination {
   mostSupportiveStaffId Int?     @map("most_supportive_staff_id")
   createdAt             DateTime @default(now()) @map("created_at")
 
-  nominator           StaffAll    @relation("Nominator",          fields: [nominatorId],           references: [id])
+  nominator           StaffAllView @relation("Nominator",         fields: [nominatorId],           references: [id])
   bestStaffMale       StaffMale?  @relation("BestStaffMale",      fields: [bestStaffMaleId],       references: [id])
   bestStaffFemale     StaffFemale? @relation("BestStaffFemale",   fields: [bestStaffFemaleId],     references: [id])
   bestDressedMale     StaffMale?  @relation("BestDressedMale",    fields: [bestDressedMaleId],     references: [id])

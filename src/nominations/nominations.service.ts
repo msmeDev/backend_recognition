@@ -67,8 +67,9 @@ export class NominationsService {
       ids[field] = val;
     }
 
-    // Verify nominator exists
-    const nominator = await this.prisma.staffAll.findUnique({
+    // Verify nominator exists. Nominators come from staff_all_view (all 38
+    // staff), which includes people who can't be nominated themselves.
+    const nominator = await this.prisma.staffAllView.findUnique({
       where: { id: ids.nominator_id },
       select: { id: true },
     });
