@@ -68,6 +68,8 @@ model StaffAllView {
 
   // nominator_id is UNIQUE, so each staff member has at most one nomination.
   nomination Nomination? @relation("Nominator")
+  // voter_id is UNIQUE, so each staff member casts at most one ballot.
+  ballot     Ballot?     @relation("Voter")
 
   @@map("staff_all_view")
 }
@@ -90,14 +92,39 @@ model Nomination {
   mostSupportiveStaffId Int?     @map("most_supportive_staff_id")
   createdAt             DateTime @default(now()) @map("created_at")
 
-  nominator           StaffAllView @relation("Nominator",         fields: [nominatorId],           references: [id])
-  bestStaffMale       StaffMale?  @relation("BestStaffMale",      fields: [bestStaffMaleId],       references: [id])
-  bestStaffFemale     StaffFemale? @relation("BestStaffFemale",   fields: [bestStaffFemaleId],     references: [id])
-  bestDressedMale     StaffMale?  @relation("BestDressedMale",    fields: [bestDressedMaleId],     references: [id])
-  bestDressedFemale   StaffFemale? @relation("BestDressedFemale", fields: [bestDressedFemaleId],   references: [id])
-  mostSocialStaff     StaffAll?   @relation("MostSocialStaff",    fields: [mostSocialStaffId],     references: [id])
-  bestTeamPlayer      StaffAll?   @relation("BestTeamPlayer",     fields: [bestTeamPlayerId],      references: [id])
-  mostSupportiveStaff StaffAll?   @relation("MostSupportiveStaff", fields: [mostSupportiveStaffId], references: [id])
+  nominator           StaffAllView @relation("Nominator", fields: [nominatorId], references: [id])
+  bestStaffMale       StaffMale?   @relation("BestStaffMale", fields: [bestStaffMaleId], references: [id])
+  bestStaffFemale     StaffFemale? @relation("BestStaffFemale", fields: [bestStaffFemaleId], references: [id])
+  bestDressedMale     StaffMale?   @relation("BestDressedMale", fields: [bestDressedMaleId], references: [id])
+  bestDressedFemale   StaffFemale? @relation("BestDressedFemale", fields: [bestDressedFemaleId], references: [id])
+  mostSocialStaff     StaffAll?    @relation("MostSocialStaff", fields: [mostSocialStaffId], references: [id])
+  bestTeamPlayer      StaffAll?    @relation("BestTeamPlayer", fields: [bestTeamPlayerId], references: [id])
+  mostSupportiveStaff StaffAll?    @relation("MostSupportiveStaff", fields: [mostSupportiveStaffId], references: [id])
 
   @@map("nominations")
+}
+
+// ---------------------------------------------------------------------------
+// Ballots table (voting phase)
+// UNIQUE on voterId: one ballot per staff member.
+// Nominee columns hold staff_all_view ids. Which ids are allowed in each
+// category is the shortlist in src/vote/vote.shortlist.ts, checked on submit.
+// ---------------------------------------------------------------------------
+
+model Ballot {
+  id                    Int      @id @default(autoincrement())
+  voterId               Int      @unique @map("voter_id")
+  bestStaffMaleId       Int      @map("best_staff_male_id")
+  bestStaffFemaleId     Int      @map("best_staff_female_id")
+  bestDressedMaleId     Int      @map("best_dressed_male_id")
+  bestDressedFemaleId   Int      @map("best_dressed_female_id")
+  mostSocialStaffId     Int      @map("most_social_staff_id")
+  bestTeamPlayerId      Int      @map("best_team_player_id")
+  mostSupportiveStaffId Int      @map("most_supportive_staff_id")
+  risingStarId          Int      @map("rising_star_id")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  voter StaffAllView @relation("Voter", fields: [voterId], references: [id])
+
+  @@map("ballots")
 }
